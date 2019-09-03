@@ -1,4 +1,4 @@
-## Interface: 80200
+## Interface: 11302
 ## Title: WeakAuras Options
 ## Author: Mirrored and the WeakAuras Team
 ## Version: 2.14.6
@@ -24,7 +24,6 @@ RegionOptions\Icon.lua
 RegionOptions\Text.lua
 RegionOptions\Group.lua
 RegionOptions\DynamicGroup.lua
-RegionOptions\Model.lua
 RegionOptions\ProgressTexture.lua
 
 SubRegionOptions\SubRegionCommon.lua
@@ -49,7 +48,6 @@ OptionsFrames\OptionsFrame.lua
 OptionsFrames\CodeReview.lua
 OptionsFrames\IconPicker.lua
 OptionsFrames\ImportExport.lua
-OptionsFrames\ModelPicker.lua
 OptionsFrames\TextEditor.lua
 OptionsFrames\TexturePicker.lua
 # -- misc Frames
