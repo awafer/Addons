@@ -1,0 +1,17 @@
+* 3.1
+    - Fixed issue with AddOns that display quest level in quest log
+
+* 3.0
+    - Changed completeness to use `IsQuestComplete` instead of a map of quest ids
+
+* 2.0
+    - Most quests in the world that are never marked "Complete" should be handled
+
+* 1.2
+    - Added some RFC quests
+
+* 1.1
+    - Added some Human and Undead quests that are never marked completed in the log
+
+* 1.0
+    - Initial Release

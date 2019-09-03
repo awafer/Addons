@@ -1,0 +1,28 @@
+﻿to-do*
+
+*known issues*
+
+ 
+*wiki pages*
+ * main wiki page - https://github.com/arkayenro/arkinventory-classic/wiki
+ * faq - https://github.com/arkayenro/arkinventory-classic/wiki/FAQ
+ 
+ 
+*1.00.04 (27-AUG-2019)*
+ * added - quivers and ammo bags
+ * removed - more stuff that no longer exists
+ * fixed - config window
+ 
+*1.00.03 (27-AUG-2019)*
+ * fixed - config window
+ 
+*1.00.02 (21-AUG-2019)*
+ * fixed - translations for herbalism and mining
+ * fixed - restack and change character icons
+
+*1.00.01 (16-AUG-2019)*
+ * fixed - rules windows not opening
+ * fixed - issue with companion file
+
+*1.00.00 (11-AUG-2019)*
+ * initial release

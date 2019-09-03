@@ -1,0 +1,16 @@
+## Interface: 11302
+
+## Title: Ark Inventory [Classic] [Rules]
+## Author: Arkayenro - Khaz'goroth
+## Email: arkayenro at gmail dot com
+## Version: 10000
+
+## Notes: Rules for ArkInventoryClassic
+
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## RequiredDeps: ArkInventoryClassic
+
+ArkInventoryClassicRules.lua
+
+ArkInventoryClassicRules.xml

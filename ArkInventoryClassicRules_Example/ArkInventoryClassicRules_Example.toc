@@ -1,0 +1,19 @@
+## License: LGPL v2.1 (this file specifically)
+
+## Interface: 11302
+
+## Title: Ark Inventory [Classic] [Rules] ExampleRule
+## Author: Arkayenro - Khaz'goroth
+## Email: arkayenro at gmail dot com
+## Version: 10000
+
+## Notes: Example rule for ArkInventoryClassic
+
+## DefaultState: Disabled
+## LoadOnDemand: 0
+## RequiredDeps: ArkInventoryClassicRules
+
+## OptionalDeps: InsertAnyModsHereThatYourRuleMightNeed
+
+
+ArkInventoryClassicRules_Example.lua
