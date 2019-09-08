@@ -1,7 +1,7 @@
 -- HereBeDragons is a data API for the World of Warcraft mapping system
 
 -- HereBeDragons-1.0 is not supported on WoW 8.0
-if select(4, GetBuildInfo()) >= 80000 or true then
+if select(4, GetBuildInfo()) >= 80000 then
 	return
 end
 
@@ -617,7 +617,6 @@ end
 -- @param zone MapID or MapFile of the zone
 -- @param level Optional level of the zone
 function HereBeDragons:GetWorldCoordinatesFromZone(x, y, zone, level)
-	
     local data = getMapDataTable(zone, level)
     if not data or data[1] == 0 or data[2] == 0 then return nil, nil, nil end
     if not x or not y then return nil, nil, nil end
