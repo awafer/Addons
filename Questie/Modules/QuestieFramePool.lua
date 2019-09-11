@@ -11,7 +11,7 @@ local HBD = LibStub("HereBeDragonsQuestie-2.0")
 local HBDPins = LibStub("HereBeDragonsQuestie-Pins-2.0")
 local HBDMigrate = LibStub("HereBeDragonsQuestie-Migrate")
 
-_QuestieFramePool.addonPath = "Interface\\Addons\\QuestieDev-master\\"
+_QuestieFramePool.addonPath = "Interface\\Addons\\Questie\\"
 
 --TODO: Add all types (we gotta stop using globals, needs refactoring)
 ICON_TYPE_AVAILABLE =  _QuestieFramePool.addonPath.."Icons\\available.blp"
@@ -137,26 +137,6 @@ function QuestieFramePool:UpdateGlowConfig(mini, mode)
         for _, icon in pairs(usedFrames) do
             if ((mini and icon.miniMapIcon) or (not mini and not icon.miniMapIcon)) and icon.glow then
                 icon.glow:Hide()
-            end
-        end
-    end
-end
-
-function QuestieFramePool:UpdateColorConfig(mini, enable)
-    if enable then
-        for _, icon in pairs(usedFrames) do
-            if (mini and icon.miniMapIcon) or not mini then
-                local colors = {1, 1, 1}
-                if icon.data.IconColor ~= nil then
-                    colors = icon.data.IconColor
-                end
-                icon.texture:SetVertexColor(colors[1], colors[2], colors[3], 1)
-            end
-        end
-    else
-        for _, icon in pairs(usedFrames) do
-            if (mini and icon.miniMapIcon) or not mini then
-                icon.texture:SetVertexColor(1, 1, 1, 1)
             end
         end
     end

@@ -39,7 +39,7 @@ function QuestieQuest:ToggleNotes(desiredValue)
                  or ((not Questie.db.global.enableTurnins) and icon.data.Type == "complete")
                  or ((not Questie.db.global.enableAvailable) and icon.data.Type == "available"))
                  or ((not Questie.db.global.enableMapIcons) and (not icon.miniMapIcon))
-                 or ((not Questie.db.global.enableMiniMapIcons) and (icon.miniMapIcon))) or (icon.data.ObjectiveData and icon.data.ObjectiveData.HideIcons) or (icon.data.QuestData and icon.data.QuestData.HideIcons and icon.data.Type ~= "complete") then
+                 or ((not Questie.db.global.enableMiniMapIcons) and (icon.miniMapIcon))) then
                     icon:FakeUnhide()
                 end
             end
@@ -159,7 +159,7 @@ function QuestieQuest:UpdateHiddenNotes()
                  or ((not Questie.db.global.enableTurnins) and icon.data.Type == "complete")
                  or ((not Questie.db.global.enableAvailable) and icon.data.Type == "available"))
                  or ((not Questie.db.global.enableMapIcons) and (not icon.miniMapIcon))
-                 or ((not Questie.db.global.enableMiniMapIcons) and (icon.miniMapIcon))) or (icon.data.ObjectiveData and icon.data.ObjectiveData.HideIcons) or (icon.data.QuestData and icon.data.QuestData.HideIcons and icon.data.Type ~= "complete") then
+                 or ((not Questie.db.global.enableMiniMapIcons) and (icon.miniMapIcon))) then
                     icon:FakeHide()
                 else
                     icon:FakeUnhide()
@@ -234,6 +234,41 @@ function LOGONDEBUG_REMOVEQUEST(QuestId)
     Questie:Debug(DEBUG_DEVELOP, "[QuestieQuest]: ".. QuestieLocale:GetUIString('DEBUG_REMOVE_QUEST', QuestId, qCurrentQuestlog[QuestId]));
 end
 
+--Use the category order to draw the quests and trust the database order.
+--/dump QuestieQuest:GetAllQuestObjectives(24475)
+--Use -> QuestieQuest:GetAllQuestObjectives(QuestId)
+--170
+function QuestieQuest:TrackQuest(QuestId)--Should probably be called from some kind of questlog or similar, will have to wait untill classic to find out how tracking really works...
+    Quest = qCurrentQuestlog[QuestId]
+    --Quest = QuestieDB:GetQuest(QuestId)
+
+    ObjectiveID = 0
+    if type(Quest) == "table" then
+        Questie:Debug(DEBUG_INFO, "[QuestieQuest]:", QuestId)
+        if(Quest.Objectives["NPC"] ~= nil) then
+            for index, ObjectiveData in pairs(Quest.Objectives["NPC"]) do
+                for _, NPCID in pairs(ObjectiveData) do
+                    NPC = QuestieDB:GetNPC(NPCID)
+                    for Zone, Spawns in pairs(NPC.Spawns) do
+                        for _, coords in ipairs(Spawns) do
+                            Questie:Debug(DEBUG_INFO, "[QuestieQuest]:", Zone, coords[1], coords[2])
+                            data = {}
+                            data.Id = QuestId;
+                            data.Icon = ICON_TYPE_SLAY
+                            data.ObjectiveId = ObjectiveID
+                            data.NpcData = NPC;
+                            data.tooltip = {NPC.Name}
+                            --data.QuestData = Quest;
+                            QuestieMap:DrawWorldIcon(data, Zone, coords[1], coords[2])
+                        end
+                    end
+                end
+                ObjectiveID = ObjectiveID + 1
+            end
+        end--
+    end
+end
+
 function QuestieQuest:AcceptQuest(questId)
     --Get all the Frames for the quest and unload them, the available quest icon for example.
     QuestieMap:UnloadQuestFrames(questId);
@@ -284,8 +319,6 @@ function QuestieQuest:CompleteQuest(QuestId)
     --TODO: This can probably be done better?
     QuestieQuest:CalculateAvailableQuests()
     QuestieQuest:DrawAllAvailableQuests();
-    
-    QuestieTracker:Update()
 
     Questie:Debug(DEBUG_INFO, "[QuestieQuest]: ".. QuestieLocale:GetUIString('DEBUG_COMPLETE_QUEST', QuestId));
 end
@@ -312,8 +345,6 @@ function QuestieQuest:AbandonedQuest(QuestId)
         end
         QuestieQuest:CalculateAvailableQuests()
         QuestieQuest:DrawAllAvailableQuests()
-        
-        QuestieTracker:Update()
 
         Questie:Debug(DEBUG_INFO, "[QuestieQuest]: ".. QuestieLocale:GetUIString('DEBUG_ABANDON_QUEST', QuestId));
     end
@@ -329,7 +360,7 @@ function QuestieQuest:UpdateQuest(QuestId)
             --DEFAULT_CHAT_FRAME:AddMessage("Finished " .. QuestId);
             QuestieMap:UnloadQuestFrames(QuestId);
             QuestieQuest:AddFinisher(quest)
-
+            return
         else
             --DEFAULT_CHAT_FRAME:AddMessage("Still not finished " .. QuestId);
         end
@@ -345,7 +376,7 @@ function QuestieQuest:GetAllQuestIds()
         title, level, _, isHeader, _, isComplete, _, questId, _, displayQuestId, _, _, _, _, _, _, _ = GetQuestLogTitle(index)
         if(not isHeader) then
             --Keep the object in the questlog to save searching
-            local Quest = QuestieDB:GetQuest(questId)
+            Quest = QuestieDB:GetQuest(questId)
             if(Quest ~= nil) then
                 QuestieQuest:PopulateQuestLogInfo(Quest)
                 QuestieQuest:PopulateObjectiveNotes(Quest)
@@ -370,7 +401,7 @@ function QuestieQuest:GetAllQuestIdsNoObjectives()
         title, level, _, isHeader, _, isComplete, _, questId, _, displayQuestId, _, _, _, _, _, _, _ = GetQuestLogTitle(index)
         if(not isHeader) then
             --Keep the object in the questlog to save searching
-            local Quest = QuestieDB:GetQuest(questId)
+            Quest = QuestieDB:GetQuest(questId)
             if(Quest ~= nil) then
                 qCurrentQuestlog[questId] = Quest
             else
@@ -418,7 +449,7 @@ function QuestieQuest:UpdateObjectiveNotes(Quest)
     end
 end
 function QuestieQuest:AddFinisher(Quest)
-    local NPC = nil
+    NPC = nil
     if Quest.Finisher ~= nil then
         if Quest.Finisher.Type == "monster" then
             NPC = QuestieDB:GetNPC(Quest.Finisher.Id)
@@ -687,7 +718,6 @@ function QuestieQuest:PopulateObjective(Quest, ObjectiveIndex, Objective, BlockI
                     data.QuestData = Quest
                     data.ObjectiveData = Objective
                     data.Icon = spawnData.Icon
-                    data.IconColor = Quest.Color
                     data.GetIconScale = function() return spawnData:GetIconScale() or 1 end
                     data.IconScale = data:GetIconScale()
                     data.Name = spawnData.Name
@@ -749,25 +779,11 @@ local _randomSeed = 0;
 function QuestieQuest:math_randomseed(seed)
     _randomSeed = seed
 end
-function QuestieQuest:math_random(low_or_high_arg, high_arg)
-    local low = nil
-    local high = nil
-    if low_or_high_arg ~= nil then
-        if high_arg ~= nil then
-            low = low_or_high_arg
-            high = high_arg
-        else
-            low = 1
-            high = low_or_high_arg
-        end
-    end
-
+function QuestieQuest:math_random()
+    local high = 0xffffff;
     _randomSeed = (_randomSeed * 214013 + 2531011) % 2^32;
-    local rand = (math.floor(_randomSeed / 2^16) % 2^15) / 0x7fff;
-    if high == nil then
-        return rand
-    end
-    return low + math.floor(rand * high)
+    local rand = math.floor(_randomSeed / 2^16) % 2^15;
+    return (1 + math.floor(rand / 0x7fff * high)) / high
 end
 
 function QuestieQuest:PopulateObjectiveNotes(Quest) -- this should be renamed to PopulateNotes as it also handles finishers now
@@ -1002,7 +1018,7 @@ function _QuestieQuest:DrawAvailableQuest(questObject, noChildren)
     if (questObject == nil) then
         return false;
     end
-    
+	
     -- recheck IsDoable (shouldn't be needed)
     if not _QuestieQuest:IsDoable(questObject) then return false; end
 
@@ -1020,7 +1036,7 @@ function _QuestieQuest:DrawAvailableQuest(questObject, noChildren)
     --TODO More logic here, currently only shows NPC quest givers.
     if questObject.Starts["GameObject"] ~= nil then
         for index, ObjectID in ipairs(questObject.Starts["GameObject"]) do
-            local obj = QuestieDB:GetObject(ObjectID)
+            obj = QuestieDB:GetObject(ObjectID)
             if(obj ~= nil and obj.Spawns ~= nil) then
                 --Questie:Debug(DEBUG_DEVELOP,"Adding Quest:", questObject.Id, "StarterNPC:", NPC.Id)
                 for Zone, Spawns in pairs(obj.Spawns) do
@@ -1061,7 +1077,7 @@ function _QuestieQuest:DrawAvailableQuest(questObject, noChildren)
         end
     elseif(questObject.Starts["NPC"] ~= nil)then
         for index, NPCID in ipairs(questObject.Starts["NPC"]) do
-            local NPC = QuestieDB:GetNPC(NPCID)
+            NPC = QuestieDB:GetNPC(NPCID)
             if (NPC ~= nil and NPC.Spawns ~= nil and NPC.Friendly) then
                 --Questie:Debug(DEBUG_DEVELOP,"Adding Quest:", questObject.Id, "StarterNPC:", NPC.Id)
                 for Zone, Spawns in pairs(NPC.Spawns) do
@@ -1110,7 +1126,7 @@ function QuestieQuest:DrawAllAvailableQuests()--All quests between
     for questid, qid in pairs(qAvailableQuests) do
         --If the quest is not drawn draw the quest, otherwise skip.
         if(not qQuestIdFrames[questid]) then
-            local Quest = QuestieDB:GetQuest(questid)
+            Quest = QuestieDB:GetQuest(questid)
             --Draw a specific quest through the function
             _QuestieQuest:DrawAvailableQuest(Quest)
         end

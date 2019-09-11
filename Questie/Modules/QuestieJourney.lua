@@ -5,7 +5,7 @@ local journeyFrame = {};
 local isWindowShown = false;
 local lastOpenWindow = "journey";
 local lastOpenSearch = "quest";
-local containerCache = nil;
+containerCache = nil;
 
 local function Spacer(container, size)
     local spacer = AceGUI:Create("Label");
@@ -1100,8 +1100,8 @@ local function DrawZoneQuestTab(container)
     Spacer(container);
 
     -- Dropdown for Continent
-    local CDropdown = AceGUI:Create("LQDropdown");
-    local zDropdown = AceGUI:Create("LQDropdown");
+    local CDropdown = AceGUI:Create("Dropdown");
+    local zDropdown = AceGUI:Create("Dropdown");
     local treegroup = AceGUI:Create("SimpleGroup");
 
     CDropdown:SetList(continentTable);
@@ -1201,7 +1201,7 @@ function CollectZoneQuests(container, zoneid)
 end
 
 -- Draw search results from advanced search tab
-local searchResultTabs = nil;
+searchResultTabs = nil;
 function DrawSearchResultTab(searchGroup, searchType, query)
     if not searchResultTabs then
         searchGroup:ReleaseChildren();
@@ -1270,9 +1270,9 @@ function DrawSearchResultTab(searchGroup, searchType, query)
 end
 
 -- Advanced Search Tab
-local typeDropdown = nil;
-local searchBox = nil;
-local searchGroup = nil;
+typeDropdown = nil;
+searchBox = nil;
+searchGroup = nil;
 local function DrawSearchTab(container)
     -- Header
     local header = AceGUI:Create("Heading");
@@ -1281,7 +1281,7 @@ local function DrawSearchTab(container)
     container:AddChild(header);
     Spacer(container);
     -- Declare scopes
-    typeDropdown = AceGUI:Create("LQDropdown");
+    typeDropdown = AceGUI:Create("Dropdown");
     searchBox = AceGUI:Create("EditBox");
     searchGroup = AceGUI:Create("SimpleGroup");
     local searchBtn = AceGUI:Create("Button");
@@ -1570,7 +1570,7 @@ function journeySelectTabGroup(container, event, group)
     end
 end
 
-local tabGroup = nil;
+tabGroup = nil;
 function QuestieJourney:Initialize()
 
     journeyFrame.frame = AceGUI:Create("Frame");
