@@ -1,4 +1,0 @@
-*3.01.05 (27-JUN-2019)*
- * changed - toc updated to 80200
- * fixed - issue with button recycling and 8.2 setpoint
- 
