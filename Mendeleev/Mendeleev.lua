@@ -1,15 +1,31 @@
 local L = LibStub("AceLocale-3.0"):GetLocale("Mendeleev")
 local PT = LibStub("LibPeriodicTable-3.1")
 
+local _G = getfenv(0)
+
 -- We cache the results, so that we don't have to do a PT lookup for every item.
 local cache = {}
 
 Mendeleev = LibStub("AceAddon-3.0"):NewAddon("Mendeleev", "AceHook-3.0", "AceEvent-3.0")
-local Mendeleev     = Mendeleev
-local GetItemCount  = GetItemCount
-local GetItemIcon   = GetItemIcon
-local GetItemInfo   = GetItemInfo
-local GetSpellInfo  = GetSpellInfo
+local Mendeleev		= Mendeleev
+local GetItemCount	= _G.GetItemCount
+local GetItemIcon	= _G.GetItemIcon
+local GetItemInfo	= _G.GetItemInfo
+local GetSpellInfo	= _G.GetSpellInfo
+
+local ipairs		= _G.ipairs
+local pairs			= _G.pairs
+local select		= _G.select
+local tonumber		= _G.tonumber
+local type			= _G.type
+
+local string_format	= _G.string.format
+local string_gsub	= _G.string.gsub
+local string_match	= _G.string.match
+local string_rep	= _G.string.rep
+
+local table_insert	= _G.table.insert
+local table_sort	= _G.table.sort
 
 local skillcolor = {
 	[-1] = "|cffff0000",
@@ -21,64 +37,78 @@ local skillcolor = {
 
 local options = {
 	type = "group",
-	get = function(info) return Mendeleev.db.profile[info[#info]] end,
-	set = function(info, value) Mendeleev.db.profile[info[#info]] = value end,
 	args = {
-		showItemLevel = {
+		itemLevel = {
 			type = "toggle",
 			name = L["Show item level"],
 			desc = L["Toggle showing the item level in the tooltip."],
+			get = function() return Mendeleev.db.profile.showItemLevel end,
+			set = function(_, v) Mendeleev.db.profile.showItemLevel = v end,
 			width = "full",
 			order = 1,
 		},
-		showItemID = {
+		itemId = {
 			type = "toggle",
 			name = L["Show item identifier"],
 			desc = L["Toggle showing the item identifier in the tooltip."],
+			get = function() return Mendeleev.db.profile.showItemID end,
+			set = function(_, v) Mendeleev.db.profile.showItemID = v end,
 			width = "full",
 			order = 2,
 		},
-		showItemCount = {
+		itemCount = {
 			type = "toggle",
 			name = L["Show item count"],
 			desc = L["Toggle showing the item count in the tooltip."],
+			get = function() return Mendeleev.db.profile.showItemCount end,
+			set = function(_, v) Mendeleev.db.profile.showItemCount = v end,
 			width = "full",
 			order = 3,
 		},
-		showStackSize = {
+		stackSize = {
 			type = "toggle",
 			name = L["Show stack size"],
 			desc = L["Toggle showing the stack size in the tooltip."],
+			get = function() return Mendeleev.db.profile.showStackSize end,
+			set = function(_, v) Mendeleev.db.profile.showStackSize = v end,
 			width = "full",
 			order = 4,
 		},
-		showUsedInTree = {
+		usedInTree = {
 			type = "toggle",
 			name = L["Show 'used in' tree"],
 			desc = L["Toggle showing the 'used in' tree in the tooltip."],
+			get = function() return Mendeleev.db.profile.showUsedInTree end,
+			set = function(_, v) Mendeleev.db.profile.showUsedInTree = v end,
 			width = "full",
 			order = 5,
 		},
-		UsedInTreeIcons = {
+		usedInTreeIcons = {
 			type = "toggle",
 			name = L["Show icons in 'used in' tree"],
 			desc = L["Toggle showing of icons in the 'used in' tree."],
+			get = function() return Mendeleev.db.profile.UsedInTreeIcons end,
+			set = function(_, v) Mendeleev.db.profile.UsedInTreeIcons = v end,
 			width = "full",
 			order = 6,
 		},
-		UsedInTreeMinSkill = {
+		usedInTreeMinSkill = {
 			type = "select",
 			name = L["Minimal skill for 'used in' tree"],
 			desc = L["Minimal skill advance for an item to show up in the 'used in' tree."],
 			values = {[-1] = skillcolor[-1]..L["TRADESKILL_UNKNOWN"].."|r", [0] = skillcolor[0]..L["TRADESKILL_TRIVIAL"].."|r", [1] = skillcolor[1]..L["TRADESKILL_EASY"].."|r", [2] = skillcolor[2]..L["TRADESKILL_MEDIUM"].."|r", [3] = skillcolor[3]..L["TRADESKILL_OPTIMAL"].."|r"},
+			get = function() return Mendeleev.db.profile.UsedInTreeMinSkill end,
+			set = function(_, v) Mendeleev.db.profile.UsedInTreeMinSkill = v end,
 			width = "full",
 			order = 7,
 		},
-		UsedInTreeMinSkillShift = {
+		usedInTreeMinSkillShift = {
 			type = "select",
 			name = L["Minimal skill for 'used in' tree (shift)"],
 			desc = L["Minimal skill advance for an item to show up in the 'used in' tree if Shift is held."],
 			values = {[-1] = skillcolor[-1]..L["TRADESKILL_UNKNOWN"].."|r", [0] = skillcolor[0]..L["TRADESKILL_TRIVIAL"].."|r", [1] = skillcolor[1]..L["TRADESKILL_EASY"].."|r", [2] = skillcolor[2]..L["TRADESKILL_MEDIUM"].."|r", [3] = skillcolor[3]..L["TRADESKILL_OPTIMAL"].."|r"},
+			get = function() return Mendeleev.db.profile.UsedInTreeMinSkillShift end,
+			set = function(_, v) Mendeleev.db.profile.UsedInTreeMinSkillShift = v end,
 			width = "full",
 			order = 8,
 		},
@@ -98,36 +128,33 @@ function Mendeleev:OnInitialize()
 			UsedInTreeMinSkillShift = -1,
 			sets = {},
 		}
-	}, true)
+	})
 
 	local t = {
 		name = L["Toggle sets."],
 		desc = L["Toggle sets from showing information in the tooltip."],
 		type = "group",
-		get = function(info) return not self.db.profile.sets[info[#info]] end,
-		set = function(info, value)
-			self.db.profile.sets[info[#info]] = not value
-			wipe(cache)
-		end,
 		args = {},
 	}
 
-	for _, v in next, MENDELEEV_SETS do
+	for _, v in ipairs(MENDELEEV_SETS) do
 		local key = v.setindex
-		local parent = key:match("^([^%.]*)")
-		key = key:gsub(" ", "_")
+		local parent = string_match(key, "^([^%.]*)")
+		key = string_gsub(key, " ", "_")
 		if not t.args[parent] then
 			t.args[parent] = {
 				name = L[parent],
-				desc = L["Toggle sets in the %s category."]:format(L[parent]),
+				desc = string_format(L["Toggle sets in the %s category."], L[parent]),
 				type = "group",
 				args = {},
 			}
 		end
 		t.args[parent].args[key] = {
 			name = v.name,
-			desc = L["Toggle %s."]:format(v.name),
+			desc = string_format(L["Toggle %s."], v.name),
 			type = "toggle",
+			get  = function() return not self.db.profile.sets[key] end,
+			set  = function(info, val) self.db.profile.sets[key] = not val cache = {} end,
 		}
 	end
 	
@@ -149,10 +176,15 @@ function Mendeleev:OnEnable()
 	self:SecureHookScript(ShoppingTooltip2, "OnTooltipCleared")
 	self:SecureHookScript(ShoppingTooltip3, "OnTooltipSetItem")
 	self:SecureHookScript(ShoppingTooltip3, "OnTooltipCleared")
+	
+	if AtlasLootTooltip then
+		self:SecureHookScript(AtlasLootTooltip, "OnTooltipSetItem")
+		self:SecureHookScript(AtlasLootTooltip, "OnTooltipCleared")
+	end
 
 	if firstLoad then
 		-- load our sets into the cache
-		for _,v in next, MENDELEEV_SETS do
+		for _,v in ipairs(MENDELEEV_SETS) do
 			PT:GetSetTable(v.setindex)
 		end
 		collectgarbage()
@@ -160,6 +192,7 @@ function Mendeleev:OnEnable()
 	end
 
 	self:RegisterEvent("TRADE_SKILL_SHOW", "ScanTradeSkill")
+	self:RegisterEvent("TRADE_SKILL_CLOSE", "ScanTradeSkill")
 end
 
 -- function Mendeleev:OnDisable()
@@ -200,7 +233,12 @@ end
 
 local tradeskillNames = {
 	["Alchemy"] = GetSpellInfo(2259),
-	["Blacksmithing"] = GetSpellInfo(2018),
+	["Blacksmithing.Armorsmith"] = GetSpellInfo(9788),
+	["Blacksmithing.Basic"] = GetSpellInfo(2018),
+	["Blacksmithing.Weaponsmith.Axesmith"] = GetSpellInfo(17041),
+	["Blacksmithing.Weaponsmith.Basic"] = GetSpellInfo(9787),
+	["Blacksmithing.Weaponsmith.Hammersmith"] = GetSpellInfo(17040),
+	["Blacksmithing.Weaponsmith.Swordsmith"] = GetSpellInfo(17039),
 	["Cooking"] = GetSpellInfo(2550),
 	["Enchanting"] = GetSpellInfo(7411),
 	["Engineering.Basic"] = GetSpellInfo(4036),
@@ -209,10 +247,16 @@ local tradeskillNames = {
 	["First Aid"] = GetSpellInfo(3273),
 	["Inscription"] = GetSpellInfo(45357),
 	["Jewelcrafting"] = GetSpellInfo(25229),
-	["Leatherworking"] = GetSpellInfo(2108),
+	["Leatherworking.Basic"] = GetSpellInfo(2108),
+	["Leatherworking.Dragonscale"] = GetSpellInfo(10657),
+	["Leatherworking.Elemental"] = GetSpellInfo(10659),
+	["Leatherworking.Tribal"] = GetSpellInfo(10661),
 	["Poisons"] = GetSpellInfo(2842),
 	["Smelting"] = GetSpellInfo(2575),
-	["Tailoring"] = GetSpellInfo(3908),
+	["Tailoring.Basic"] = GetSpellInfo(3908),
+	["Tailoring.Mooncloth"] = GetSpellInfo(26798),
+	["Tailoring.Shadoweave"] = GetSpellInfo(26801),
+	["Tailoring.Spellfire"] = GetSpellInfo(26797),
 }
 
 function Mendeleev:GetLinesForTradeskillReagent(skill, reagent)
@@ -234,7 +278,12 @@ local id2skill = setmetatable({}, {__index = function(self, key) local value = -
 
 local tradeskills = {
 	"Alchemy",
-	"Blacksmithing",
+	"Blacksmithing.Armorsmith",
+	"Blacksmithing.Basic",
+	"Blacksmithing.Weaponsmith.Axesmith",
+	"Blacksmithing.Weaponsmith.Basic",
+	"Blacksmithing.Weaponsmith.Hammersmith",
+	"Blacksmithing.Weaponsmith.Swordsmith",
 	"Cooking",
 	"Enchanting",
 	"Engineering.Basic",
@@ -243,10 +292,16 @@ local tradeskills = {
 	"First Aid",
 	"Inscription",
 	"Jewelcrafting",
-	"Leatherworking",
+	"Leatherworking.Basic",
+	"Leatherworking.Dragonscale",
+	"Leatherworking.Elemental",
+	"Leatherworking.Tribal",
 	"Poisons",
 	"Smelting",
-	"Tailoring",
+	"Tailoring.Basic",
+	"Tailoring.Mooncloth",
+	"Tailoring.Shadoweave",
+	"Tailoring.Spellfire",
 }
 
 local function SortUsedInTree(a,b)
@@ -273,7 +328,7 @@ end
 
 function Mendeleev:GetUsedInFullTable(id)
 	if cacheUsedInFull[id] == nil then
-		for _, skill in next, tradeskills do
+		for _, skill in ipairs(tradeskills) do
 			local usedin = self:GetUsedInTable(skill, id)
 			if usedin then
 				for item, num in pairs(usedin) do
@@ -299,31 +354,32 @@ function Mendeleev:GetUsedInTree(id, history)
 		for k, v in pairs(usedin) do
 			if history:find(">"..k.."<") then
 				if k < 0 then
-					data[#data+1] = {k, GetSpellInfo(-k) or false, id2skill[k], "..."}
+					table_insert(data, {k, GetSpellInfo(-k) or false, id2skill[k], "..."})
 				else
-					data[#data+1] = {k, GetItemInfo(k) or false, id2skill[k], "..."}
+					table_insert(data, {k, GetItemInfo(k) or false, id2skill[k], "..."})
 				end
 			else
 				local tdata, tskill = self:GetUsedInTree(k, history..">"..k.."<")
 				if tskill > skill then
 					skill = tskill
 				end
-				data[#data+1] = tdata
+				table_insert(data, tdata)
 			end
 		end
 	end
-	table.sort(data, SortUsedInTree)
-	table.insert(data, 1, id)
+	table_sort(data, SortUsedInTree)
+	table_insert(data, 1, id)
 	if id < 0 then
-		table.insert(data, 2, GetSpellInfo(-id) or false)
+		table_insert(data, 2, GetSpellInfo(-id) or false)
 	else
-		table.insert(data, 2, GetItemInfo(id) or false)
+		table_insert(data, 2, GetItemInfo(id) or false)
 	end
-	table.insert(data, 3, skill)
+	table_insert(data, 3, skill)
 	return data, skill
 end
 
 function Mendeleev:GetUsedInList(tree, level, counttable, countmult)
+
 	local UsedInTreeIcons         = self.db.profile.UsedInTreeIcons
 	local UsedInTreeMinSkill      = self.db.profile.UsedInTreeMinSkill
 	local UsedInTreeMinSkillShift = self.db.profile.UsedInTreeMinSkillShift
@@ -332,29 +388,29 @@ function Mendeleev:GetUsedInList(tree, level, counttable, countmult)
 	local didpoints = false
 	for i = 4, #tree do
 		local v = tree[i]
-		if v[3] >= UsedInTreeMinSkill or (IsShiftKeyDown() and v[3] >= UsedInTreeMinSkillShift) then
+		if v[3] >= UsedInTreeMinSkill or IsShiftKeyDown() and v[3] >= UsedInTreeMinSkillShift then
 			if UsedInTreeIcons then
 				local icontag = (v[1] < 0) and select(3, GetSpellInfo(-v[1])) or GetItemIcon(v[1])
 				icontag = icontag and "|T"..icontag..":18|t " or ""
-				list[#list+1] = string.rep("    ", level).."- "..skillcolor[id2skill[v[1]] or -1]..icontag..(v[2] or ((v[1] < 0) and ("spell:"..(-v[1])) or ("item:"..v[1]))).."|r"
+				table_insert(list, string_rep("    ", level).."- "..skillcolor[id2skill[v[1]] or -1]..icontag..(v[2] or ((v[1] < 0) and ("spell:"..(-v[1])) or ("item:"..v[1]))).."|r")
 			else
-				list[#list+1] = string.rep("    ", level).."- "..skillcolor[id2skill[v[1]] or -1]..(v[2] or ((v[1] < 0) and ("spell:"..(-v[1])) or ("item:"..v[1]))).."|r"
+				table_insert(list, string_rep("    ", level).."- "..skillcolor[id2skill[v[1]] or -1]..(v[2] or ((v[1] < 0) and ("spell:"..(-v[1])) or ("item:"..v[1]))).."|r")
 			end
-			list[#list+1] = countmult * counttable[v[1]]
+			table_insert(list, countmult * counttable[v[1]])
 			if type(v[4]) == "table" then
 				local slist = self:GetUsedInList(v, level+1, cacheUsedInFull[v[1]], countmult * counttable[v[1]])
 				if #slist > 0 then
 					for _, line in pairs(slist) do
-						list[#list+1] = line
+						table_insert(list, line)
 					end
 				end
 			elseif v[4] == "..." then
-				list[#list+1] = string.rep("    ", level+1).."..."
-				list[#list+1] = ""
+				table_insert(list, string_rep("    ", level+1).."...")
+				table_insert(list, "")
 			end
 		elseif not didpoints then
-			list[#list+1] = string.rep("    ", level).."- "..skillcolor[v[3]].."...|r"
-			list[#list+1] = ""
+			table_insert(list, string_rep("    ", level).."- "..skillcolor[v[3]].."...|r")
+			table_insert(list, "")
 			didpoints = true
 		end
 	end
@@ -364,16 +420,21 @@ end
 local skillquals = {trivial = 0, easy = 1, medium = 2, optimal = 3}
 
 function Mendeleev:ScanTradeSkill()
-	local isLink, unit = IsTradeSkillLinked()
-	if unit and not UnitIsUnit(unit, "player") then return end
-	for i = 1, GetNumTradeSkills() do
-		local skillName, skillType = GetTradeSkillInfo(i)
-		if skillType ~= "header" and skillName then
-			local item = GetTradeSkillItemLink(i)
-			if item then
-				local id = tonumber(item:match("item:(%d+)")) or -tonumber(item:match("enchant:(%d+)"))
-				if id then
-					id2skill[tonumber(id)] = skillquals[skillType]
+	if TradeSkillFrame and TradeSkillFrame:IsShown() and not IsTradeSkillLinked() then
+		for i=1, GetNumTradeSkills() do
+			local _, type, _, _ = GetTradeSkillInfo(i)
+			if type ~= "header" then
+				local item = GetTradeSkillItemLink(i)
+				if item then
+					local id = string_match(item, "item:(%d+)")
+					if id then
+						id2skill[tonumber(id)] = skillquals[type]
+					else
+						id = string_match(item, "enchant:(%d+)")
+						if id then
+							id2skill[-tonumber(id)] = skillquals[type]
+						end
+					end
 				end
 			end
 		end
@@ -387,7 +448,7 @@ function Mendeleev:OnTooltipSetItem(tooltip, ...)
 	local db = self.db.profile
 
 	if cache[item] == nil then
-		for _,v in next, MENDELEEV_SETS do
+		for _,v in ipairs(MENDELEEV_SETS) do
 			if not db.sets[v.setindex] and quality >= v.quality then
 				local lines = nil
 				local c = v.colour or "|cffffffff"
@@ -398,19 +459,19 @@ function Mendeleev:OnTooltipSetItem(tooltip, ...)
 						if type(v.descfunc) == "function" then
 							local ret = v.descfunc(desc, item, val)
 							if type(ret) == "table" then
-								for i, v in next, ret do
-									lines[#lines+1] = c .. ret[i] .. "|r"
+								for i, v in ipairs(ret) do
+									table_insert(lines, c .. ret[i] .. "|r")
 								end
 							elseif type(ret) == "string" then
-								lines[#lines+1] = c .. ret .. "|r"
+								table_insert(lines, c .. ret .. "|r")
 							end
 						else
-							lines[#lines+1] = c .. desc .. (type(val) ~= "boolean" and v.useval and v.useval(val) or "") .. "|r"
+							table_insert(lines, c .. desc .. (type(val) ~= "boolean" and v.useval and v.useval(val) or "") .. "|r")
 						end
 					end
 				end
 				if lines then
-					table.sort(lines)
+					table_sort(lines)
 					if not cache[item] then cache[item] = {} end
 					cache[item][v.setindex] = {c .. v.header .. "|r", lines}
 				end
@@ -421,7 +482,7 @@ function Mendeleev:OnTooltipSetItem(tooltip, ...)
 			for k in pairs(cache[item]) do
 				indextable[#indextable+1] = k
 			end
-			table.sort(indextable)
+			table_sort(indextable)
 			cache[item]["_index"] = indextable
 		else
 			cache[item] = false
@@ -429,10 +490,10 @@ function Mendeleev:OnTooltipSetItem(tooltip, ...)
 	end
 
 	if cache[item] then
-		for _, k in next, cache[item]["_index"] do
+		for _, k in ipairs(cache[item]["_index"]) do
 			local v = cache[item][k]
 			local first = 1
-			for i, line in next, v[2] do
+			for i, line in ipairs(v[2]) do
 				if first == 1 then
 					tooltip:AddDoubleLine(v[1], line)
 					first = 0
