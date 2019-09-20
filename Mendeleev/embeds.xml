@@ -13,7 +13,6 @@
 
 <Include file="libs\LibBabble-Boss-3.0\lib.xml"/>
 <Include file="libs\LibBabble-Zone-3.0\lib.xml"/>
-<Include file="libs\LibBabble-Class-3.0\lib.xml"/>
 
 <script file="libs\LibPeriodicTable-3.1\LibPeriodicTable-3.1.lua"/>
 <script file="libs\LibPeriodicTable-3.1-Consumable\LibPeriodicTable-3.1-Consumable.lua"/>

@@ -9,7 +9,7 @@
 -- make into AceHook.
 -- @class file
 -- @name AceHook-3.0
--- @release $Id: AceHook-3.0.lua 766 2009-04-04 08:26:05Z nevcairiel $
+-- @release $Id: AceHook-3.0.lua 877 2009-11-02 15:56:50Z nevcairiel $
 local ACEHOOK_MAJOR, ACEHOOK_MINOR = "AceHook-3.0", 5
 local AceHook, oldminor = LibStub:NewLibrary(ACEHOOK_MAJOR, ACEHOOK_MINOR)
 
@@ -30,11 +30,14 @@ local actives = AceHook.actives
 local scripts = AceHook.scripts
 local onceSecure = AceHook.onceSecure
 
-local _G = _G
+-- Lua APIs
+local pairs, next, type = pairs, next, type
 local format = string.format
-local next = next
-local pairs = pairs
-local type = type
+local assert, error = assert, error
+
+-- WoW APIs
+local issecurevariable, hooksecurefunc = issecurevariable, hooksecurefunc
+local _G = _G
 
 -- functions for later definition
 local donothing, createHook, hook

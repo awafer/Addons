@@ -1,4 +1,4 @@
-local L = LibStub("AceLocale-3.0"):NewLocale("Mendeleev", "enUS", true)
+﻿local L = LibStub("AceLocale-3.0"):NewLocale("Mendeleev", "enUS", true)
 
 L["Toggle sets."] = true
 L["Toggle sets from showing information in the tooltip."] = true
@@ -85,6 +85,10 @@ L["Crusade Card"] = true
 L["Vengeance Card"] = true
 L["Madness Card"] = true
 L["Wrath Card"] = true
+L["Illusion Card"] = true
+L["Berserker! Card"] = true
+L["Greatness Card"] = true
+L["Death Card"] = true
 
 -- Sources
 L["Drop"] = true
@@ -96,6 +100,9 @@ L["UBRS"] = true
 L["LBRS"] = true
 	
 L["Heroic"] = true
+	
+L["(10 Man)"] = true
+L["(25 Man)"] = true
 	
 -- Tier Sets
 L["Tier 1 Set"] = true
@@ -109,6 +116,12 @@ L["Tier 7.10 Set"] = true
 L["Tier 7.25 Set"] = true
 L["Tier 8.10 Set"] = true
 L["Tier 8.25 Set"] = true
+L["Tier 9.232 Set"] = true
+L["Tier 9.245 Set"] = true
+L["Tier 9.258 Set"] = true
+L["Tier 10.251 Set"] = true
+L["Tier 10.264 Set"] = true
+L["Tier 10.277 Set"] = true
 	
 -- Arena Sets
 L["Arena - Season 1 Set"] = true
@@ -118,31 +131,53 @@ L["Arena - Season 4 Set"] = true
 L["Arena - Season 5 Tier 1 Set"] = true
 L["Arena - Season 5 Tier 2 Set"] = true
 L["Arena - Season 5 Tier 3 Set"] = true
+L["Arena - Season 6 Set"] = true
+L["Arena - Season 7 Set"] = true
+L["Arena - Season 8 Set"] = true
 	
 L["%d%% alc/vol (%d proof)"] = true
 L[" (%d tickets)"] = true
 
 -- Ore Nodes
 L["Copper Vein"] = true
+L["Incendicite Mineral Vein"] = true
 L["Tin Vein"] = true
+L["Lesser Bloodstone Deposit"] = true
+L["Ooze Covered Silver Vein"] = true
 L["Silver Vein"] = true
 L["Iron Deposit"] = true
+L["Indurium Mineral Vein"] = true
 L["Gold Vein"] = true
+L["Ooze Covered Gold Vein"] = true
 L["Mithril Deposit"] = true
+L["Ooze Covered Mithril Deposit"] = true
+L["Ooze Covered Truesilver Deposit"] = true
 L["Truesilver Deposit"] = true
-L["Small Thorium Vein"] = true
-L["Hakkari Thorium Vein"] = true
-L["Rich Thorium Vein"] = true
 L["Dark Iron Deposit"] = true
-L["Adamantite Deposit"] = true
+L["Ooze Covered Thorium Vein"] = true
+L["Small Thorium Vein"] = true
+L["Ooze Covered Rich Thorium Vein"] = true
+L["Rich Thorium Vein"] = true
 L["Fel Iron Deposit"] = true
-L["Khorium Vein"] = true
-L["Rich Adamantite Deposit"] = true
+L["Nethercite Deposit"] = true
+L["Large Obsidian Chunk"] = true
+L["Small Obsidian Chunk"] = true
+L["Adamantite Deposit"] = true
 L["Cobalt Deposit"] = true
+L["Rich Adamantite Deposit"] = true
+L["Ancient Gem Vein"] = true
+L["Khorium Vein"] = true
 L["Rich Cobalt Deposit"] = true
 L["Saronite Deposit"] = true
+L["Obsidium Deposit"] = true
 L["Rich Saronite Deposit"] = true
+L["Pure Saronite Deposit"] = true
+L["Rich Obsidium Deposit"] = true
 L["Titanium Vein"] = true
+L["Elementium Vein"] = true
+L["Rich Elementium Vein"] = true
+L["Pyrite Deposit"] = true
+L["Rich Pyrite Deposit"] = true
 
 -- Categories
 L["CurrencyItems"] = true
@@ -157,6 +192,7 @@ L["Reagent"] = true
 L["Tradeskill"] = true
 	
 L["Trash Mobs"] = true
+L["Gunship Battle"] = true
 
 -- Timed Reward Chest
 L["Timed Reward Chest1"] = true
